@@ -1,0 +1,107 @@
+<html>
+
+<head>
+    <style>
+        textarea {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: block;
+            resize: none;
+            overflow: hidden;
+            width: 120ch;
+            margin-top: 8px;
+        }
+    </style>
+
+</head>
+
+<body>
+    Editor
+    <pre>
+        alt-n               New editor
+        alt-Up              Navigate up an editor
+        alt-Down            Navigate down an editor        
+        alt-shift-Up        Move an editor up
+        alt-shift-Down      Move an editor down
+        alt-W               Close an editor
+        alt-Enter           Run code in editor
+    </pre>
+
+    <div id="editors"></div>
+    <script id="library"></script>
+    <script type="text/javascript">
+        document.addEventListener('keyup', (keyEvent) => {
+            if (keyEvent.altKey && keyEvent.key === "n") {
+                var a = document.getElementById('editors').appendChild(document.createElement('textarea'));
+                a.focus();
+            }
+            else if (keyEvent.altKey && keyEvent.shiftKey && keyEvent.key === "ArrowUp") {
+                var activeElement = document.activeElement;
+                activeElement.parentElement.insertBefore(activeElement, activeElement.previousSibling);
+                activeElement.focus();
+            }
+            else if (keyEvent.altKey && keyEvent.shiftKey && keyEvent.key === "ArrowDown") {
+                var activeElement = document.activeElement;
+                activeElement.parentElement.insertBefore(activeElement.nextSibling, activeElement);
+                activeElement.focus();
+            }
+            else if (keyEvent.altKey && keyEvent.key === "ArrowUp") {
+                document.activeElement.previousSibling.focus();
+            }
+            else if (keyEvent.altKey && keyEvent.key === "ArrowDown") {
+                document.activeElement.nextSibling.focus();
+            }
+
+            else if (keyEvent.altKey && keyEvent.key === "S") {
+                //$0.setAttribute('value', $0.value);
+                //document.body.innerHTML
+
+                // Export as an html file. The whole thing.
+            }
+            else if (keyEvent.altKey && keyEvent.key === "w") {
+
+                var nextFocus = null;
+                // Handle null;                
+                var nextFocus = document.activeElement.previousSibling;
+                if (!nextFocus || nextFocus.nodeName != "TEXTAREA") {
+                    nextFocus = document.activeElement.nextSibling;
+                }
+                if (nextFocus.nodeName != "TEXTAREA") {
+                    nextFocus = null;
+                }
+                document.activeElement.parentElement.removeChild(document.activeElement);
+                if (nextFocus) nextFocus.focus();
+            }
+            else if (keyEvent.altKey && keyEvent.key == "Enter") {
+                try {
+
+                    // var result = eval(document.activeElement.value);
+                    // runningCode.appendChild
+                    // var fn = new Function(document.activeElement.value);
+                    // var result = fn();
+                    var oScript = document.createElement("script");
+                    var oScriptText = document.createTextNode(document.activeElement.value);
+                    oScript.appendChild(oScriptText);
+                    document.getElementById("library").appendChild(oScript);
+                    var result = eval(document.activeElement.value);
+                    // todo: better function behavior?
+
+                    // var fn = new Function(document.activeElement.value);
+                    // debugger;
+                }
+                catch (error) {
+                    var result = error;
+                }
+                document.getElementById('output').innerText = result || '';
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            event.srcElement.style.height = "auto";
+            event.srcElement.style.height = (event.srcElement.scrollHeight + 15) + "px";
+        });
+
+    </script>
+    <div id="output"></div>
+</body>
+
+</html>
