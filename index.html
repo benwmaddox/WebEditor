@@ -25,11 +25,30 @@
         alt-shift-Down      Move an editor down
         alt-W               Close an editor
         alt-Enter           Run code in editor
+        alt-s               Save whole file
     </pre>
 
     <div id="editors"></div>
-    <script id="library"></script>
+    <div id="library"></div>
     <script type="text/javascript">
+        // Function to download data to a file
+        function download(data, filename, type) {
+            var file = new Blob([data], { type: type });
+            if (window.navigator.msSaveOrOpenBlob) // IE10+
+                window.navigator.msSaveOrOpenBlob(file, filename);
+            else { // Others
+                var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+        }
         document.addEventListener('keyup', (keyEvent) => {
             if (keyEvent.altKey && keyEvent.key === "n") {
                 var a = document.getElementById('editors').appendChild(document.createElement('textarea'));
@@ -52,11 +71,19 @@
                 document.activeElement.nextSibling.focus();
             }
 
-            else if (keyEvent.altKey && keyEvent.key === "S") {
+            else if (keyEvent.altKey && keyEvent.key === "s") {
+                //https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility
                 //$0.setAttribute('value', $0.value);
                 //document.body.innerHTML
 
                 // Export as an html file. The whole thing.
+                // var blob = new Blob(document.body.innerHTML, { type: "text/html;charset=utf-8" })
+                // saveas
+
+                // Note that closing tags are split up because I don't really want to end the html document
+                var html = '<html><head>' + document.head.innerHTML + '<' + '/head><body>' + document.body.innerHTML + '<' + '/body><' + '/html>';
+                download(html, "index2.html", "text/html;charset=utf-8");
+
             }
             else if (keyEvent.altKey && keyEvent.key === "w") {
 
