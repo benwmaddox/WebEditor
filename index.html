@@ -12,7 +12,8 @@
             margin-top: 8px;
         }
     </style>
-
+    <link rel="stylesheet" type="text/css" href="codemirror.css" />
+    <script src="codemirror.js"></script>
 </head>
 
 <body>
@@ -29,8 +30,39 @@
     </pre>
 
     <div id="editors"></div>
-    <div id="library"></div>
+    <div id="library">
+        <script type="text/javascript" id="Core.namespace">
+            var Functions = {};
+
+            function namespace(namespacePath, fn) {
+                // TODO: stick into Functions variable
+                var pathSplits = namespacePath.split('.');
+
+                return fn;
+            }
+            namespace('Core', namespace);
+        </script>
+        <script type="text/javascript" id="Core.getFunctionScripts">
+            function getFunctionScripts() {
+                return Array.from(document.querySelectorAll('script[id]'));
+            }
+            namespace('Core', getFunctionScripts);
+        </script>
+        <script type="text/javascript" id="Core.extractFunctionDetail">
+            function extractFunctionDetail(element) {
+                return {
+                    id: element.id,
+                    content: element.innerHTML
+                };
+            }
+            namespace('Core', extractFunctionDetail);
+        </script>
+    </div>
     <script type="text/javascript">
+        var fileHandle = null;
+        function pickFile() {
+
+        }
         // Function to download data to a file
         function download(data, filename, type) {
             var file = new Blob([data], { type: type });
@@ -49,8 +81,17 @@
                 }, 0);
             }
         }
+        namespace('Core.IO', download);
         document.addEventListener('keyup', (keyEvent) => {
             if (keyEvent.altKey && keyEvent.key === "n") {
+                // var newEditor = document.createElement('textarea');
+                // var a = document.getElementById('editors').appendChild(newEditor);
+                // var editor = CodeMirror.fromTextArea(newEditor, {
+                //     lineNumbers: true,
+                //     mode: "javascript"
+                // });
+                // editor.focus();
+                // debugger;
                 var a = document.getElementById('editors').appendChild(document.createElement('textarea'));
                 a.focus();
             }
@@ -107,7 +148,9 @@
                     // var fn = new Function(document.activeElement.value);
                     // var result = fn();
                     var oScript = document.createElement("script");
+                    // document.activeElement.save();
                     var oScriptText = document.createTextNode(document.activeElement.value);
+                    console.log(oScriptText);
                     oScript.appendChild(oScriptText);
                     document.getElementById("library").appendChild(oScript);
                     var result = eval(document.activeElement.value);
