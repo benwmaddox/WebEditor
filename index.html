@@ -60,11 +60,31 @@
     </div>
     <script type="text/javascript">
         var fileHandle = null;
-        function pickFile() {
+        async function pickFile() {
+            // open file picker
+            [fileHandle] = await window.showSaveFilePicker();
+            debugger;
+            if (fileHandle.kind === 'file') {
+                // run file code
 
+            } else if (fileHandle.kind === 'directory') {
+                // run directory code
+            }
+
+            const writableStream = await fileHandle.createWritable();
+
+        }
+        async function writeToFileHandle(content) {
+            const writableStream = await fileHandle.createWritable();
+            await writableStream.write(imgBlob);
+            await writableStream.close();
         }
         // Function to download data to a file
         function download(data, filename, type) {
+            if (fileHandle) {
+                writeToFileHandle(data);
+                return;
+            }
             var file = new Blob([data], { type: type });
             if (window.navigator.msSaveOrOpenBlob) // IE10+
                 window.navigator.msSaveOrOpenBlob(file, filename);
@@ -112,6 +132,9 @@
                 document.activeElement.nextSibling.focus();
             }
 
+            else if (keyEvent.altKey && keyEvent.key === "o") {
+                pickFile();
+            }
             else if (keyEvent.altKey && keyEvent.key === "s") {
                 //https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility
                 //$0.setAttribute('value', $0.value);
