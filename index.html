@@ -63,29 +63,33 @@
         async function pickFile() {
             // open file picker
             [fileHandle] = await window.showSaveFilePicker();
-            debugger;
             if (fileHandle.kind === 'file') {
                 // run file code
 
             } else if (fileHandle.kind === 'directory') {
                 // run directory code
             }
-
-            const writableStream = await fileHandle.createWritable();
+            return fileHandle;
 
         }
-        async function writeToFileHandle(content) {
-            const writableStream = await fileHandle.createWritable();
+        async function writeToFileHandle(handle, content) {
+            const writableStream = await handle.createWritable();
             await writableStream.write(imgBlob);
             await writableStream.close();
         }
         // Function to download data to a file
-        function download(data, filename, type) {
+        async function download(data, filename, type) {
+            var handle = fileHandle || await pickFile();
+
+            var file = new Blob([data], { type: type });
+
             if (fileHandle) {
-                writeToFileHandle(data);
+                writeToFileHandle(handle, data);
+                debugger;
                 return;
             }
-            var file = new Blob([data], { type: type });
+            debugger;
+
             if (window.navigator.msSaveOrOpenBlob) // IE10+
                 window.navigator.msSaveOrOpenBlob(file, filename);
             else { // Others
@@ -146,7 +150,8 @@
 
                 // Note that closing tags are split up because I don't really want to end the html document
                 var html = '<html><head>' + document.head.innerHTML + '<' + '/head><body>' + document.body.innerHTML + '<' + '/body><' + '/html>';
-                download(html, "index2.html", "text/html;charset=utf-8");
+                download(html, "index3.html", "text/html;charset=utf-8");
+
 
             }
             else if (keyEvent.altKey && keyEvent.key === "w") {
