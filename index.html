@@ -62,7 +62,7 @@
         var fileHandle = null;
         async function pickFile() {
             // open file picker
-            [fileHandle] = await window.showSaveFilePicker();
+            fileHandle = await window.showSaveFilePicker();
             if (fileHandle.kind === 'file') {
                 // run file code
 
@@ -72,13 +72,14 @@
             return fileHandle;
 
         }
-        async function writeToFileHandle(handle, content) {
+        async function writeToFileHandle(handle, contentBlob) {
             const writableStream = await handle.createWritable();
-            await writableStream.write(imgBlob);
+            await writableStream.write(contentBlob);
             await writableStream.close();
         }
         // Function to download data to a file
         async function download(data, filename, type) {
+            debugger;
             var handle = fileHandle || await pickFile();
 
             var file = new Blob([data], { type: type });
