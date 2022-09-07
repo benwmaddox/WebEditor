@@ -27,6 +27,7 @@ var Ctx = {
     },
     "save": async function save() {
       this.handler = this.handler || await window.showSaveFilePicker();
+      var contentBlob = Ctx.Core.stringify(Ctx);
       const writableStream = await handle.createWritable();
       await writableStream.write(contentBlob);
       await writableStream.close();
