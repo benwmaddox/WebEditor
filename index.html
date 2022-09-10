@@ -45,6 +45,7 @@ var Context = {
       return fn.toString();
     },
     "edit": function edit(fn) {
+    // todo: Might have to search through the Context to find a match on the FN to add the path to the output here.
       copy(fn.toString());
       console.log(`Item copied to the clipboard`);
       // debugger;
