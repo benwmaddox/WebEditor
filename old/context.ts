@@ -9,6 +9,7 @@ var Ctx = {
     "help": function () {
 
     },
+
     "stringify": function stringify(obj, prop) {
       //https://gist.github.com/cowboy/3749767
       var placeholder = '____PLACEHOLDER____';
@@ -28,16 +29,19 @@ var Ctx = {
     "save": async function save() {
       this.handler = this.handler || await window.showSaveFilePicker();
       var contentBlob = Ctx.Core.stringify(Ctx);
-      const writableStream = await handle.createWritable();
+      // console.log(contentBlob);
+      debugger;
+      const writableStream = await this.handler.createWritable();
       await writableStream.write(contentBlob);
       await writableStream.close();
     },
     "view": function view(fn) {
-      console.log(fn.toString());
+      // console.log(fn.toString());
+      return fn.toString();
     },
     "edit": function edit(fn) {
-      console.log(`Item copied to the clipboard`);
       copy(fn.toString());
+      console.log(`Item copied to the clipboard`);
       // debugger;
     }
   }

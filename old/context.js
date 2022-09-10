@@ -1,9 +1,8 @@
-<html><head></head><body></body><script>
 var Context = {
-  "HTML": {
+  HTML: {
     "tag": (tagName, attributes, children) => '<' + tagName + '>' + children.join('') + '</' + tagName + '>'
   },
-  "Core": {
+  Core: {
     "help": function () {
       // TODO: return some notes. possibly interactive with state being saved to help
     },
@@ -53,7 +52,7 @@ var Context = {
 
     }
   },
-  "main": function main() {
+  main: function main() {
     // Add some favorite functions to the top level
     window.edit = Context.Core.edit;
     window.view = Context.Core.view;
@@ -61,9 +60,7 @@ var Context = {
 	
 	// init the app
 	var tag = Context.HTML.tag;
-	document.body.innerHTML = tag("div", {}, [tag("h1", {}, ["Welcome"]), tag("p", {}, ["Please open dev tools, Console, then start interacting with the Context object for development"]),tag("p", {}, ["If you want to change a function, you could run something like: Context.main = function(){ [...]}. You define everything in the browser. Then run save() in the console and pick the same html file you started editing. It will overwrite the existing file and include all of the changes you put into the Context object. This is meant to be edited in a single file and allow very interactive development."]),tag("p", {}, ["Once you save the file once without reloading, it should be faster to save again just by calling save(). I recommend using source control frequently after saving to disk. You should rarely need to reload the page while developing"]), tag("p", {}, ["This tool doesn't care which rendering engine you use."]), tag("p", {}, ["When developing, please try to use the full path to functions like Context.Core.stringify(). That allows you to change the function and everything that calls it will work correctly."]), tag("p", {}, ["To edit a function, such as Core.main, call edit(Core.main) which copies the function content to your clipboard. Paste into the console. Then add this before the function definition: 'Core.main = '. I'll try to make it easier in the future, but it does work like this."])
-                                             ]);
-  }
-}
+	document.body.innerHTML = tag("h1", {}, ["Welcome"]);
+  },
+};
 Context.main();
-</script></html>
