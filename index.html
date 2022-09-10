@@ -78,7 +78,44 @@ var Context = {
 <p>When developing, please try to use the full path to functions like Context.Core.stringify(). That allows you to change the function and everything that calls it will work correctly.</p>
 
 <p>To edit a function, such as Core.main, call edit(Core.main) which copies the function content to your clipboard. Paste into the console. Then add this before the function definition: 'Core.main = '. I'll try to make it easier in the future, but it does work like this.</p>`;
-    document.querySelector('body').innerHTML = html;
+    document.querySelector(targetSelector || 'body').innerHTML = html;
+}
+    },
+    "Demo": {
+      "render": function(targetSelector){
+    window.Data = window.Data || {};
+    var Data  = window.Data;
+    Data.Pages = Data.Pages || {};
+    Data.Pages.Demo = Data.Pages.Demo || {};
+    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
+    var model = Data.Pages.Demo.model;
+    
+    var html = `
+Counter demo:
+Current count: ${model.count}
+<button id="increment" onclick="Context.Pages.Demo.increment()">Increment</button><button id="decrement" onclick="Context.Pages.Demo.decrement()">Decrement</button>
+`;
+    document.querySelector(targetSelector || 'body').innerHTML = html;
+},
+      "increment": function(){
+    
+    window.Data = window.Data || {};
+    var Data = window.Data;
+    Data.Pages = Data.Pages || {};
+    Data.Pages.Demo = Data.Pages.Demo || {};
+    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
+    Data.Pages.Demo.model.count++;
+    Context.Pages.Demo.render();
+},
+      "decrement": function(){
+    window.Data = window.Data || {};
+    var Data = window.Data;
+    Data.Pages = Data.Pages || {};
+    Data.Pages.Demo = Data.Pages.Demo || {};
+    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
+    Data.Pages.Demo.model.count--;
+    Context.Pages.Demo.render();
+
 }
     }
   }
