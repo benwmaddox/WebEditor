@@ -77,7 +77,10 @@ var Context = {
 
 <p>When developing, please try to use the full path to functions like Context.Core.stringify(). That allows you to change the function and everything that calls it will work correctly.</p>
 
-<p>To edit a function, such as Core.main, call edit(Core.main) which copies the function content to your clipboard. Paste into the console. Then add this before the function definition: 'Core.main = '. I'll try to make it easier in the future, but it does work like this.</p>`;
+<p>To edit a function, such as Core.main, call edit(Core.main) which copies the function content to your clipboard. Paste into the console. Then add this before the function definition: 'Core.main = '. I'll try to make it easier in the future, but it does work like this.</p>
+
+<p>For a demo page, please <a onclick="Context.Pages.Demo.render()" href="#">click here</a></p>
+`;
     document.querySelector(targetSelector || 'body').innerHTML = html;
 }
     },
