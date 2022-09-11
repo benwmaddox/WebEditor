@@ -52,6 +52,18 @@ var Context = {
     },
     "renderTemplate": function render(templateSelector, targetSelector, model) {
 
+    },
+    "findPathOfFunction": (fn) => {
+  var path = "Context";
+  for (var i = 0; i <   Context.length; i++){
+      
+  }
+    return null;
+    
+},
+    "Tests": {
+      "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit), "Context.Core.edit"),
+      "assertEqual": (left, right) => {if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\nRight: ${right}`);}}
     }
   },
   "main": function main() {
