@@ -46,24 +46,32 @@ var Context = {
     },
     "edit": function edit(fn) {
     // todo: Might have to search through the Context to find a match on the FN to add the path to the output here.
-      copy(fn.toString());
+    var path = Context.Core.findPathOfFunction(fn, Context);
+    
+      copy("Context." + path + "= " + fn.toString());
       console.log(`Item copied to the clipboard`);
       // debugger;
     },
     "renderTemplate": function render(templateSelector, targetSelector, model) {
 
     },
-    "findPathOfFunction": (fn) => {
-  var path = "Context";
-  for (var i = 0; i <   Context.length; i++){
-      
-  }
-    return null;
+    "findPathOfFunction": (a, obj) => {
+    //https://stackoverflow.com/a/43636296/38698
+      for(var key in obj) {                                         // for each key in the object obj
+        if(obj.hasOwnProperty(key)) {                             // if it's an owned key
+            if(a === obj[key]) return key;                        // if the item beign searched is at this key then return this key as the path
+            else if(obj[key] && typeof obj[key] === "object") {   // otherwise if the item at this key is also an object
+                var path = Context.Core.findPathOfFunction(a, obj[key]);                 // search for the item a in that object
+                if(path) return key + "." + path;                 // if found then the path is this key followed by the result of the search
+            }
+        }
+    }
     
 },
     "Tests": {
-      "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit), "Context.Core.edit"),
-      "assertEqual": (left, right) => {if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\nRight: ${right}`);}}
+      "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit, Context), "Core.edit"),
+      "assertEqual": (left, right) => {if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\n Right: ${right}`);} 
+                                                   return true;}
     }
   },
   "main": function main() {
