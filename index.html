@@ -48,12 +48,9 @@ var Context = {
     // todo: Might have to search through the Context to find a match on the FN to add the path to the output here.
     var path = Context.Core.findPathOfFunction(fn, Context);
     
-      copy("Context." + path + "= " + fn.toString());
+      copy("Context." + path + " = " + fn.toString());
       console.log(`Item copied to the clipboard`);
       // debugger;
-    },
-    "renderTemplate": function render(templateSelector, targetSelector, model) {
-
     },
     "findPathOfFunction": (a, obj) => {
     //https://stackoverflow.com/a/43636296/38698
