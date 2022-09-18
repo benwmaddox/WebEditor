@@ -1,89 +1,121 @@
 <html><head></head><body></body><script>
+// @ts-check
 var Context = {
   "HTML": {
     "tag": (tagName, attributes, children) => '<' + tagName + '>' + children.join('') + '</' + tagName + '>'
   },
   "Core": {
     "help": function () {
-      // TODO: return some notes. possibly interactive with state being saved to help
-    },
+        // TODO: return some notes. possibly interactive with state being saved to help
+      },
     "stringify": function stringify(obj) {
-      //https://gist.github.com/cowboy/3749767
-      var placeholder = '____PLACEHOLDER____';
-      var fns = [];
-      var json = JSON.stringify(obj, function (key, value) {
-        if (typeof value === 'function') {
-          fns.push(value);
-          return placeholder;
-        }
-        return value;
-      }, 2);
-      json = json.replace(new RegExp('"' + placeholder + '"', 'g'), function (_) {
-        return fns.shift();
-      });
-      return json;
-    },
+        //https://gist.github.com/cowboy/3749767
+        var placeholder = '____PLACEHOLDER____';
+        var fns = [];
+        var json = JSON.stringify(obj, function (key, value) {
+          if (typeof value === 'function') {
+            // TODO: extract JSDOC from function and copy outside of function if possible
+            fns.push(value);
+            return placeholder;
+          }
+          return value;
+        }, 2);
+        json = json.replace(new RegExp('"' + placeholder + '"', 'g'), function (_) {
+          return fns.shift();
+        });
+        return json;
+      },
     "save": async function save() {
-      this.handler = this.handler || await window.showSaveFilePicker();
-      var contentBlob = Context.Core.stringify(Context);
-      var tag = Context.HTML.tag;
-      var htmlPage = tag('html', [],
-        [tag('head', [], [
-          
-        ]
-        ),
-        tag('body', [], []),
-		tag('script', [], ['\nvar Context = ' + contentBlob + '\nContext.main();\n'])
-        ]
-      );
-      const writableStream = await this.handler.createWritable();
-      await writableStream.write(htmlPage);
-      await writableStream.close();
-    },
+        this.handler = this.handler || await globalThis.showSaveFilePicker();
+        var contentBlob = Context.Core.stringify(Context);
+        var tag = Context.HTML.tag;
+        var htmlPage = tag('html', [],
+          [tag('head', [], [
+
+          ]
+          ),
+          tag('body', [], []),
+          tag('script', [], ['\n// @ts-check\nvar Context = ' + contentBlob + '\nContext.main();\n'])
+          ]
+        );
+        const writableStream = await this.handler.createWritable();
+        await writableStream.write(htmlPage);
+        await writableStream.close();
+      },
     "view": function view(fn) {
-      // console.log(fn.toString());
-      return fn.toString();
-    },
+        /**
+       * Returns a readable version of the function
+       * @param {function} fn - The function. 
+       */
+        // console.log(fn.toString());
+        return fn.toString();
+        Context.Core.edit(5);
+      },
     "edit": function edit(fn) {
-    // todo: Might have to search through the Context to find a match on the FN to add the path to the output here.
-    var path = Context.Core.findPathOfFunction(fn, Context);
-    
-      copy("Context." + path + " = " + fn.toString());
-      console.log(`Item copied to the clipboard`);
-      // debugger;
-    },
+        var path = Context.Core.findPathOfFunction(fn, Context);
+
+        copy("Context." + path + " = " + fn.toString());
+        console.log(`Item copied to the clipboard`);
+        // debugger;
+      },
     "findPathOfFunction": (a, obj) => {
-    //https://stackoverflow.com/a/43636296/38698
-      for(var key in obj) {                                         // for each key in the object obj
-        if(obj.hasOwnProperty(key)) {                             // if it's an owned key
-            if(a === obj[key]) return key;                        // if the item beign searched is at this key then return this key as the path
-            else if(obj[key] && typeof obj[key] === "object") {   // otherwise if the item at this key is also an object
-                var path = Context.Core.findPathOfFunction(a, obj[key]);                 // search for the item a in that object
-                if(path) return key + "." + path;                 // if found then the path is this key followed by the result of the search
+        //https://stackoverflow.com/a/43636296/38698
+        for (var key in obj) {                                         // for each key in the object obj
+          if (obj.hasOwnProperty(key)) {                             // if it's an owned key
+            if (a === obj[key]) return key;                        // if the item beign searched is at this key then return this key as the path
+            else if (obj[key] && typeof obj[key] === "object") {   // otherwise if the item at this key is also an object
+              var path = Context.Core.findPathOfFunction(a, obj[key]);                 // search for the item a in that object
+              if (path) return key + "." + path;                 // if found then the path is this key followed by the result of the search
             }
+          }
         }
-    }
-    
-},
+
+      },
     "Tests": {
       "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit, Context), "Core.edit"),
-      "assertEqual": (left, right) => {if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\n Right: ${right}`);} 
-                                                   return true;}
+      "assertEqual": (left, right) => {
+          if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\n Right: ${right}`); }
+          return true;
+        }
+    },
+    "flattenForTreeShaking": (obj) => {
+    var flattened = Context.Core.flattenObject(obj);    
+    var result = 'function a() { ';
+    for (var key in flattened) {
+        result += 'var ' + key.replaceAll(' ', '_') + '= ' + flattened[key].toString() + ';';
     }
+    result += "}\na.main();";
+    var reg = /Context\.(?<replacementSpots>[a-zA-Z0-9\.]*)/g;
+    // TODO: replace context calls
+    return result;
+},
+    "flattenObject": (obj, parentKey = '') => {
+    // https://stackoverflow.com/a/66120249
+    if (parentKey !== '') parentKey += '___';
+    let flattened = {};
+    Object.keys(obj).forEach((key) => {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+            Object.assign(flattened, Context.Core.flattenObject(obj[key], parentKey + key))
+        } else {
+            flattened[parentKey + key] = obj[key]
+        }
+    })
+    return flattened;
+}
   },
   "main": function main() {
-    // Add some favorite functions to the top level
-    window.edit = Context.Core.edit;
-    window.view = Context.Core.view;
-    window.save = Context.Core.save;
-	
-	// init the app
-    Context.Pages.Home.render(null, null);
-  },
+      // Add some favorite functions to the top level
+      globalThis.edit = Context.Core.edit;
+      globalThis.view = Context.Core.view;
+      globalThis.save = Context.Core.save;
+
+      // init the app
+      Context.Pages.Home.render(null, null);
+    },
   "Pages": {
     "Home": {
-      "render": function(targetSelector, model) {
-    var html = `
+      "render": function (targetSelector, model) {
+          var html = `
 <H1>Welcome</H1>
 <p>Please open dev tools, Console, then start interacting with the Context object for development</p>
 
@@ -99,46 +131,73 @@ var Context = {
 
 <p>For a demo page, please <a onclick="Context.Pages.Demo.render()" href="#">click here</a></p>
 `;
-    document.querySelector(targetSelector || 'body').innerHTML = html;
-}
+          document.querySelector(targetSelector || 'body').innerHTML = html;
+        }
     },
     "Demo": {
-      "render": function(targetSelector){
-    window.Data = window.Data || {};
-    var Data  = window.Data;
-    Data.Pages = Data.Pages || {};
-    Data.Pages.Demo = Data.Pages.Demo || {};
-    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
-    var model = Data.Pages.Demo.model;
-    
-    var html = `
-Counter demo:
-Current count: ${model.count}
+      "render": function (targetSelector) {
+          globalThis.Data = globalThis.Data || {};
+          var Data = globalThis.Data;
+          Data.Pages = Data.Pages || {};
+          Data.Pages.Demo = Data.Pages.Demo || {};
+          Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 }
+          var model = Data.Pages.Demo.model;
+
+          var html = `
+<h1>Counter demo:</h1>
+<p>Current count: ${model.count}</p>
 <button id="increment" onclick="Context.Pages.Demo.increment()">Increment</button><button id="decrement" onclick="Context.Pages.Demo.decrement()">Decrement</button>
 `;
-    document.querySelector(targetSelector || 'body').innerHTML = html;
-},
-      "increment": function(){
-    
-    window.Data = window.Data || {};
-    var Data = window.Data;
-    Data.Pages = Data.Pages || {};
-    Data.Pages.Demo = Data.Pages.Demo || {};
-    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
-    Data.Pages.Demo.model.count++;
-    Context.Pages.Demo.render();
-},
-      "decrement": function(){
-    window.Data = window.Data || {};
-    var Data = window.Data;
-    Data.Pages = Data.Pages || {};
-    Data.Pages.Demo = Data.Pages.Demo || {};
-    Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 } 
-    Data.Pages.Demo.model.count--;
-    Context.Pages.Demo.render();
+          document.querySelector(targetSelector || 'body').innerHTML = html;
+        },
+      "increment": function () {
 
-}
+          globalThis.Data = globalThis.Data || {};
+          var Data = globalThis.Data;
+          Data.Pages = Data.Pages || {};
+          Data.Pages.Demo = Data.Pages.Demo || {};
+          Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 }
+          Data.Pages.Demo.model.count++;
+          Context.Pages.Demo.render();
+        },
+      "decrement": function () {
+          globalThis.Data = globalThis.Data || {};
+          var Data = globalThis.Data;
+          Data.Pages = Data.Pages || {};
+          Data.Pages.Demo = Data.Pages.Demo || {};
+          Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 }
+          Data.Pages.Demo.model.count--;
+          Context.Pages.Demo.render();
+
+        }
     }
+  },
+  "Viewer": {
+    "render": () => {
+    var id = "Core-FileViewer";
+    var node = document.getElementById(id) || document.createElement('div');
+    node.id = id;
+    var liString = '';
+    for (var contextKey in Context){
+        liString += '<li>' + contextKey + '</li>';
+        if (typeof(Context[contextKey]) == 'object'){
+            liString += '<ol>';
+            var level1 = Context[contextKey];
+            for (var level1Key in level1){
+                liString += '<li>' + level1Key + '</li>';
+            }
+            liString += '</ol>';
+        }
+        liString += '</li>'
+    }
+    
+    node.innerHTML = `<h4>Function Viewer</h4>
+<ol>
+${liString}
+</ol>
+`;
+    document.body.appendChild(node);
+}
   }
 }
 Context.main();
