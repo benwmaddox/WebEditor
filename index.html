@@ -1,19 +1,14 @@
-<html>
-
-<head></head>
-
-<body></body>
-<script>
-  // @ts-check
-  var Context = {
-    "HTML": {
-      "tag": (tagName, attributes, children) => '<' + tagName + '>' + children.join('') + '</' + tagName + '>'
-    },
-    "Core": {
-      "help": function () {
+<html><head></head><body></body><script>
+// @ts-check
+var Context = {
+  "HTML": {
+    "tag": (tagName, attributes, children) => '<' + tagName + '>' + children.join('') + '</' + tagName + '>'
+  },
+  "Core": {
+    "help": function () {
         // TODO: return some notes. possibly interactive with state being saved to help
       },
-      "stringify": function stringify(obj) {
+    "stringify": function stringify(obj) {
         //https://gist.github.com/cowboy/3749767
         var placeholder = '____PLACEHOLDER____';
         var fns = [];
@@ -30,7 +25,7 @@
         });
         return json;
       },
-      "save": async function save() {
+    "save": async function save() {
         this.handler = this.handler || await globalThis.showSaveFilePicker();
         var contentBlob = Context.Core.stringify(Context);
         var tag = Context.HTML.tag;
@@ -47,7 +42,7 @@
         await writableStream.write(htmlPage);
         await writableStream.close();
       },
-      "view": function view(fn) {
+    "view": function view(fn) {
         /**
        * Returns a readable version of the function
        * @param {function} fn - The function. 
@@ -55,14 +50,14 @@
         // console.log(fn.toString());
         return fn.toString();
       },
-      "edit": function edit(fn) {
+    "edit": function edit(fn) {
         var path = Context.Core.findPathOfFunction(fn, Context);
 
         copy("Context." + path + " = " + fn.toString());
         console.log(`Item copied to the clipboard`);
         // debugger;
       },
-      "findPathOfFunction": (a, obj) => {
+    "findPathOfFunction": (a, obj) => {
         //https://stackoverflow.com/a/43636296/38698
         for (var key in obj) {                                         // for each key in the object obj
           if (obj.hasOwnProperty(key)) {                             // if it's an owned key
@@ -75,14 +70,25 @@
         }
 
       },
-      "Tests": {
-        "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit, Context), "Core.edit"),
-        "assertEqual": (left, right) => {
+    "namespace": (path) => {
+        /** 
+         * Ensure the namespace exists on globalThis.
+        */
+        // TODO
+        globalThis.Data = globalThis.Data || {};
+        var Data = globalThis.Data;
+        Data.Pages = Data.Pages || {};
+        Data.Pages.Demo = Data.Pages.Demo || {};
+        Data.Pages.Demo.model = Data.Pages.Demo.model || { count: 0 }
+      },
+    "Tests": {
+      "Find path of function matches": () => Context.Core.Tests.assertEqual(Context.Core.findPathOfFunction(Context.Core.edit, Context), "Core.edit"),
+      "assertEqual": (left, right) => {
           if (left !== right) { throw new Error(`AssertEqual failed. \nLeft: ${left}\n Right: ${right}`); }
           return true;
         }
-      },
-      "flattenForTreeShaking": (obj) => {
+    },
+    "flattenForTreeShaking": (obj) => {
         var flattened = Context.Core.flattenObject(obj);
         var result = 'function a() { ';
         for (var key in flattened) {
@@ -93,7 +99,7 @@
         // TODO: replace context calls
         return result;
       },
-      "flattenObject": (obj, parentKey = '') => {
+    "flattenObject": (obj, parentKey = '') => {
         // https://stackoverflow.com/a/66120249
         if (parentKey !== '') parentKey += '___';
         let flattened = {};
@@ -106,19 +112,21 @@
         })
         return flattened;
       }
-    },
-    "main": function main() {
+  },
+  "main": function main() {
       // Add some favorite functions to the top level
       globalThis.edit = Context.Core.edit;
       globalThis.view = Context.Core.view;
       globalThis.save = Context.Core.save;
+document.querySelector('body').innerHTML = `<div id="page"></div>`;
+          
 
       // init the app
       Context.Pages.Home.render(null, null);
     },
-    "Pages": {
-      "Home": {
-        "render": function (targetSelector, model) {
+  "Pages": {
+    "Home": {
+      "render": function (targetSelector, model) {
           var html = `
 <H1>Welcome</H1>
 <p>Please open dev tools, Console, then start interacting with the Context object for development</p>
@@ -135,11 +143,11 @@
 
 <p>For a demo page, please <a onclick="Context.Pages.Demo.render()" href="#">click here</a></p>
 `;
-          document.querySelector(targetSelector || 'body').innerHTML = html;
+          document.querySelector(targetSelector || '#page').innerHTML = html;
         }
-      },
-      "Demo": {
-        "render": function (targetSelector) {
+    },
+    "Demo": {
+      "render": function (targetSelector) {
           globalThis.Data = globalThis.Data || {};
           var Data = globalThis.Data;
           Data.Pages = Data.Pages || {};
@@ -152,9 +160,9 @@
 <p>Current count: ${model.count}</p>
 <button id="increment" onclick="Context.Pages.Demo.increment()">Increment</button><button id="decrement" onclick="Context.Pages.Demo.decrement()">Decrement</button>
 `;
-          document.querySelector(targetSelector || 'body').innerHTML = html;
+          document.querySelector(targetSelector || '.page').innerHTML = html;
         },
-        "increment": function () {
+      "increment": function () {
 
           globalThis.Data = globalThis.Data || {};
           var Data = globalThis.Data;
@@ -164,7 +172,7 @@
           Data.Pages.Demo.model.count++;
           Context.Pages.Demo.render();
         },
-        "decrement": function () {
+      "decrement": function () {
           globalThis.Data = globalThis.Data || {};
           var Data = globalThis.Data;
           Data.Pages = Data.Pages || {};
@@ -174,13 +182,21 @@
           Context.Pages.Demo.render();
 
         }
-      }
-    },
-    "Viewer": {
-      "render": () => {
+    }
+  },
+  "Viewer": {
+    "render": () => {
         var id = "Core-FileViewer";
         var node = document.getElementById(id) || document.createElement('div');
         node.id = id;
+    node.style = `
+        border-color: black;
+        position: absolute;
+        border: black;
+        border-style: dashed;
+        top: 1px;
+        left: 1px;
+        background-color: lightgrey;`;
         var liString = '';
         for (var contextKey in Context) {
           liString += '<li>' + contextKey + '</li>';
@@ -201,10 +217,11 @@ ${liString}
 </ol>
 `;
         document.body.appendChild(node);
+      },
+    "generate": () => {
+        var tree = "<ul>" + '' + '</ul>';
       }
-    }
   }
-  Context.main();
-</script>
-
-</html>
+}
+Context.main();
+</script></html>
