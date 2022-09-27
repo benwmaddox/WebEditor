@@ -117,10 +117,24 @@
         })
         return flattened;
       },
-      "proxyHandler": {
-        "set": function (obj, prop, value) { obj[prop] = value; }
+      "proxyChange": function (obj, prop, value) {
+
       },
-      "makeIntoProxy": function (obj) { return new Proxy(obj, Context.Core.proxyHandler) }
+      "proxyHandler": {
+        "set": function (obj, prop, value) {
+          if (value !== null && typeof value === "object") {
+            value = new Proxy(value, Context.Core.proxyHandler);
+            Context.Core.proxyChange(obj, prop, value);
+
+            // TODO: nested objects
+          }
+          obj[prop] = value;
+        }
+      },
+      "makeIntoProxy": function (obj) {
+
+        return new Proxy(obj, Context.Core.proxyHandler)
+      }
     },
     "main": function main() {
       // Add some favorite functions to the top level
@@ -129,7 +143,6 @@
       globalThis.save = Context.Core.save;
       document.querySelector('body').innerHTML = `<div id="page"></div>`;
 
-      Context.Core.makeContextIntoProxy();
       Context = Context.Core.makeIntoProxy(Context);
       // init the app
       Context.Pages.Home.render(null, null);
