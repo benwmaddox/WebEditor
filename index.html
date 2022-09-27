@@ -111,7 +111,8 @@ var Context = {
           }
         })
         return flattened;
-      }
+      },
+    "makeContextIntoProxy": function(){}
   },
   "main": function main() {
       // Add some favorite functions to the top level
@@ -120,7 +121,7 @@ var Context = {
       globalThis.save = Context.Core.save;
 document.querySelector('body').innerHTML = `<div id="page"></div>`;
           
-
+      Context.Core.makeContextIntoProxy();
       // init the app
       Context.Pages.Home.render(null, null);
     },
@@ -160,7 +161,7 @@ document.querySelector('body').innerHTML = `<div id="page"></div>`;
 <p>Current count: ${model.count}</p>
 <button id="increment" onclick="Context.Pages.Demo.increment()">Increment</button><button id="decrement" onclick="Context.Pages.Demo.decrement()">Decrement</button>
 `;
-          document.querySelector(targetSelector || '.page').innerHTML = html;
+          document.querySelector(targetSelector || '#page').innerHTML = html;
         },
       "increment": function () {
 
